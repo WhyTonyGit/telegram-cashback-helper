@@ -11,6 +11,29 @@
 
 ---
 
+## Деплой на сервере (Docker)
+
+Поднимает три контейнера: nginx (фронт + прокси), бэкенд, PostgreSQL.
+
+```bash
+# 1. Склонировать репозиторий
+git clone <repo-url> && cd telegram-cashback-helper
+
+# 2. Создать .env
+cp .env.docker.example .env
+# Заполнить POSTGRES_PASSWORD, BOT_TOKEN, MINI_APP_URL
+
+# 3. Запустить
+docker compose up -d --build
+```
+
+Приложение будет доступно на порту **80**.
+Для HTTPS — поставить перед nginx reverse proxy (например, Caddy или Nginx Proxy Manager).
+
+> Бэкенд при старте автоматически применяет миграции (`drizzle-kit push`).
+
+---
+
 ## Быстрый старт (mock-режим)
 
 Работает без бэкенда и БД — данные берутся из `src/lib/mock.ts`.
