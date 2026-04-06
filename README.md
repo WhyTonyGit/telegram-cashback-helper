@@ -15,22 +15,52 @@
 
 Поднимает три контейнера: nginx (фронт + прокси), бэкенд, PostgreSQL.
 
+### Шаг 1 — Получить переменные окружения
+
+#### `BOT_TOKEN`
+1. Открыть [@BotFather](https://t.me/BotFather) в Telegram
+2. Отправить `/newbot`, задать имя и username бота
+3. Скопировать токен вида `110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw`
+
+#### `MINI_APP_URL`
+Публичный HTTPS-адрес VM, по которому Telegram будет открывать приложение.
+Telegram Mini App работает **только через HTTPS**.
+
+Самый простой вариант — Caddy (автоматически выпускает SSL):
 ```bash
-# 1. Склонировать репозиторий
+# установить Caddy на VM
+apt install -y caddy
+
+# /etc/caddy/Caddyfile
+cashback.example.com {
+    reverse_proxy localhost:80
+}
+```
+Тогда `MINI_APP_URL=https://cashback.example.com`
+
+#### `POSTGRES_PASSWORD`
+Придумать самому, минимум 16 символов: `s0meStr0ngP4ssw0rd`
+
+> `DATABASE_URL` задавать не нужно — Docker Compose строит его автоматически.
+
+---
+
+### Шаг 2 — Запустить
+
+```bash
 git clone <repo-url> && cd telegram-cashback-helper
 
-# 2. Создать .env
 cp .env.docker.example .env
-# Заполнить POSTGRES_PASSWORD, BOT_TOKEN, MINI_APP_URL
+nano .env  # вставить свои значения
 
-# 3. Запустить
 docker compose up -d --build
 ```
 
-Приложение будет доступно на порту **80**.
-Для HTTPS — поставить перед nginx reverse proxy (например, Caddy или Nginx Proxy Manager).
+Бэкенд при старте автоматически применяет миграции БД.
 
-> Бэкенд при старте автоматически применяет миграции (`drizzle-kit push`).
+### Шаг 3 — Подключить Mini App к боту
+1. [@BotFather](https://t.me/BotFather) → `/newapp` (или `/mybots` → выбрать бота → `Bot Settings` → `Menu Button`)
+2. Указать URL: значение `MINI_APP_URL` из `.env`
 
 ---
 
